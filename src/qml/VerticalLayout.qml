@@ -9,9 +9,9 @@ Item { // 垂直布局
 
     // property list <XdgSurfaceItem> panes: [] // list
     property int spacing: 0 // 间距，暂时设置为 0
-    property XdgSurfaceItem selectSurfaceItem1: null
-    property XdgSurfaceItem selectSurfaceItem2: null
-    property XdgSurfaceItem currentSurfaceItem: null
+    property Item selectSurfaceItem1: null
+    property Item selectSurfaceItem2: null
+    property Item currentSurfaceItem: null
 
     function addPane(surfaceItem) {
         let panes = workspaceManager.wsPanesById.get(currentWsId)
