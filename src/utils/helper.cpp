@@ -731,7 +731,7 @@ void Helper::enableOutput(WOutput *output)
 
 bool Helper::beforeDisposeEvent(WSeat *seat, QWindow *watched, QInputEvent *event)
 {
-        if (event->type() == QEvent::KeyPress) {
+    if (event->type() == QEvent::KeyPress) {
         auto kevent = static_cast<QKeyEvent*>(event);
         auto modifiers = kevent->modifiers();
         auto key = kevent->key();
@@ -793,9 +793,7 @@ bool Helper::beforeDisposeEvent(WSeat *seat, QWindow *watched, QInputEvent *even
                 emit switchNextWs();
                 return true;
             }
-
         }
-
     }
 
     if (event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonPress) {
@@ -813,131 +811,54 @@ bool Helper::beforeDisposeEvent(WSeat *seat, QWindow *watched, QInputEvent *even
         }
     }
 
-    return false;
+    if (event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonPress) {
+        seat->cursor()->setVisible(true);
+    } else if (event->type() == QEvent::TouchBegin) {
+        seat->cursor()->setVisible(false);
+    }
 
-    // if (event->type() == QEvent::KeyRelease) {
-    //     if (!m_actions.empty() && !m_currentUser.isEmpty()) {
-    //         auto e = static_cast<QKeyEvent *>(event);
-    //         QKeySequence sequence(e->modifiers() | e->key());
-    //         bool isFind = false;
-    //         for (QAction *action : m_actions[m_currentUser]) {
-    //             if (action->shortcut() == sequence) {
-    //                 isFind = true;
-    //                 action->activate(QAction::Trigger);
-    //             }
-    //         }
-    //
-    //         if (isFind) {
-    //             return true;
-    //         }
-    //     }
-    // }
-    //
-    // // Alt+Tab switcher
-    // // TODO: move to mid handle
-    // auto e = static_cast<QKeyEvent *>(event);
-    //
-    // switch (e->key()) {
-    // case Qt::Key_Alt: {
-    //     if (m_switcherOn && event->type() == QKeyEvent::KeyRelease) {
-    //         m_switcherOn = false;
-    //         Q_EMIT switcherOnChanged(false);
-    //         return false;
-    //     }
-    // } break;
-    // case Qt::Key_Tab:
-    // case Qt::Key_Backtab: {
-    //     if (event->type() == QEvent::KeyPress) {
-    //         // switcher would be exclusively disabled when multitask etc is on
-    //         if (e->modifiers().testFlag(Qt::AltModifier) && m_switcherEnabled) {
-    //             if (e->modifiers() == Qt::AltModifier) {
-    //                 Q_EMIT switcherChanged(Switcher::Next);
-    //                 return true;
-    //             } else if (e->modifiers() == (Qt::AltModifier | Qt::ShiftModifier)) {
-    //                 Q_EMIT switcherChanged(Switcher::Previous);
-    //                 return true;
-    //             }
-    //         }
-    //     }
-    // } break;
-    // case Qt::Key_BracketLeft:
-    // case Qt::Key_Delete: {
-    //     if (e->modifiers() == Qt::MetaModifier) {
-    //         Q_EMIT backToNormal();
-    //         Q_EMIT reboot();
-    //         return true;
-    //     }
-    // } break;
-    // default: {
-    // } break;
-    // }
-    //
-    // if (event->type() == QEvent::KeyPress) {
-    //     auto kevent = static_cast<QKeyEvent *>(event);
-    //     if (QKeySequence(kevent->keyCombination()) == QKeySequence::Quit) {
-    //         // NOTE: 133 exitcode is reset DDM restart limit.
-    //         qApp->exit(133);
-    //         return true;
-    //     }
-    // }
-    //
-    // if (watched) {
-    //     if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::TouchBegin) {
-    //         seat->setKeyboardFocusWindow(watched);
-    //     } else if (event->type() == QEvent::MouseMove && !seat->keyboardFocusWindow()) {
-    //         // TouchMove keep focus on first window
-    //         seat->setKeyboardFocusWindow(watched);
-    //     }
-    // }
-    //
-    // if (event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonPress) {
-    //     seat->cursor()->setVisible(true);
-    // } else if (event->type() == QEvent::TouchBegin) {
-    //     seat->cursor()->setVisible(false);
-    // }
-    //
-    // if (moveReiszeState.surfaceItem
-    //     && (seat == moveReiszeState.seat || moveReiszeState.seat == nullptr)) {
-    //     // for move resize
-    //     if (Q_LIKELY(event->type() == QEvent::MouseMove || event->type() == QEvent::TouchUpdate)) {
-    //         auto cursor = seat->cursor();
-    //         Q_ASSERT(cursor);
-    //         QMouseEvent *ev = static_cast<QMouseEvent *>(event);
-    //
-    //         if (moveReiszeState.resizeEdgets == 0) {
-    //             auto increment_pos =
-    //                 ev->globalPosition() - cursor->lastPressedOrTouchDownPosition();
-    //             auto new_pos = moveReiszeState.surfacePosOfStartMoveResize
-    //                 + moveReiszeState.surfaceItem->parentItem()->mapFromGlobal(increment_pos);
-    //             moveReiszeState.surfaceItem->setPosition(new_pos);
-    //         } else {
-    //             auto increment_pos = moveReiszeState.surfaceItem->parentItem()->mapFromGlobal(
-    //                 ev->globalPosition() - cursor->lastPressedOrTouchDownPosition());
-    //             QRectF geo(moveReiszeState.surfacePosOfStartMoveResize,
-    //                        moveReiszeState.surfaceSizeOfStartMoveResize);
-    //
-    //             if (moveReiszeState.resizeEdgets & Qt::LeftEdge)
-    //                 geo.setLeft(geo.left() + increment_pos.x());
-    //             if (moveReiszeState.resizeEdgets & Qt::TopEdge)
-    //                 geo.setTop(geo.top() + increment_pos.y());
-    //
-    //             if (moveReiszeState.resizeEdgets & Qt::RightEdge)
-    //                 geo.setRight(geo.right() + increment_pos.x());
-    //             if (moveReiszeState.resizeEdgets & Qt::BottomEdge)
-    //                 geo.setBottom(geo.bottom() + increment_pos.y());
-    //
-    //             if (moveReiszeState.surfaceItem->resizeSurface(geo.size().toSize()))
-    //                 moveReiszeState.surfaceItem->setPosition(geo.topLeft());
-    //         }
-    //
-    //         return true;
-    //     } else if (event->type() == QEvent::MouseButtonRelease
-    //                || event->type() == QEvent::TouchEnd) {
-    //         stopMoveResize();
-    //     }
-    // }
-    //
-    // return false;
+    if (moveReiszeState.surfaceItem
+        && (seat == moveReiszeState.seat || moveReiszeState.seat == nullptr)) {
+        // for move resize
+        if (Q_LIKELY(event->type() == QEvent::MouseMove || event->type() == QEvent::TouchUpdate)) {
+            auto cursor = seat->cursor();
+            Q_ASSERT(cursor);
+            QMouseEvent *ev = static_cast<QMouseEvent *>(event);
+
+            if (moveReiszeState.resizeEdgets == 0) {
+                auto increment_pos =
+                    ev->globalPosition() - cursor->lastPressedOrTouchDownPosition();
+                auto new_pos = moveReiszeState.surfacePosOfStartMoveResize
+                    + moveReiszeState.surfaceItem->parentItem()->mapFromGlobal(increment_pos);
+                moveReiszeState.surfaceItem->setPosition(new_pos);
+            } else {
+                auto increment_pos = moveReiszeState.surfaceItem->parentItem()->mapFromGlobal(
+                    ev->globalPosition() - cursor->lastPressedOrTouchDownPosition());
+                QRectF geo(moveReiszeState.surfacePosOfStartMoveResize,
+                           moveReiszeState.surfaceSizeOfStartMoveResize);
+
+                if (moveReiszeState.resizeEdgets & Qt::LeftEdge)
+                    geo.setLeft(geo.left() + increment_pos.x());
+                if (moveReiszeState.resizeEdgets & Qt::TopEdge)
+                    geo.setTop(geo.top() + increment_pos.y());
+
+                if (moveReiszeState.resizeEdgets & Qt::RightEdge)
+                    geo.setRight(geo.right() + increment_pos.x());
+                if (moveReiszeState.resizeEdgets & Qt::BottomEdge)
+                    geo.setBottom(geo.bottom() + increment_pos.y());
+
+                if (moveReiszeState.surfaceItem->resizeSurface(geo.size().toSize()))
+                    moveReiszeState.surfaceItem->setPosition(geo.topLeft());
+            }
+
+            return true;
+        } else if (event->type() == QEvent::MouseButtonRelease
+                   || event->type() == QEvent::TouchEnd) {
+            stopMoveResize();
+        }
+    }
+
+    return false;
 }
 
 bool Helper::afterHandleEvent(
